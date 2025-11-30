@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import axios from "axios"
 import { Loader2 } from "lucide-react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { apiClient, handleApiError } from "@/lib/api-client"
+import { API_ENDPOINTS } from "@/lib/config"
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState<any>(null)
@@ -23,12 +24,11 @@ export default function AdminDashboard() {
 
         const fetchStats = async () => {
             try {
-                const token = localStorage.getItem("token")
-                const res = await axios.get("http://localhost:8000/api/analytics/dashboard", {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
+                const res = await apiClient.get(API_ENDPOINTS.DASHBOARD)
                 setStats(res.data)
             } catch (error) {
+                const message = handleApiError(error)
+                toast.error(message)
                 console.error("Failed to fetch analytics", error)
             } finally {
                 setLoading(false)
